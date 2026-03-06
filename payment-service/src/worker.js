@@ -105,7 +105,7 @@ const connectRabbitMQ = async () => {
 
       break;
     } catch (err) {
-      console.log("RabbitMQ not ready, retrying in 5 seconds...");
+      console.log("RabbitMQ not ready, retrying in 5 seconds...", err.message);
       await new Promise((res) => setTimeout(res, 5000));
     }
   }
