@@ -3,7 +3,7 @@ import amqp from "amqplib";
 const connectRabbitMQ = async () => {
   while (true) {
     try {
-      const connection = await amqp.connect("amqp://rabbitmq");
+      const connection = await amqp.connect(process.env.RABBITMQ_URL);
       const channel = await connection.createChannel();
 
       const exchange = "order_created_exchange";
