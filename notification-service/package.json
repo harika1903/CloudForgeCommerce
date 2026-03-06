@@ -1,0 +1,12 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/worker.js",
+  "scripts": {
+    "start": "node src/worker.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3"
+  }
+}

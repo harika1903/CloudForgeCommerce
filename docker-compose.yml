@@ -1,0 +1,105 @@
+
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    networks:
+      - cloudforge-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cloudforge-network
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    env_file:
+      - ./user-service/.env
+    ports:
+      - "3003:3003"
+    depends_on:
+      - mongo
+    networks:
+      - cloudforge-network
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    env_file:
+      - ./product-service/.env
+    depends_on:
+      - mongo
+    networks:
+      - cloudforge-network
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    env_file:
+      - ./order-service/.env
+    depends_on:
+      - mongo
+      - user-service
+      - product-service
+    ports:
+      - "3002:3002"
+    networks:
+      - cloudforge-network
+
+  payment-service:
+    environment:
+      - STRIPE_SECRET_KEY=sk_test_4eC39HqLyjWDarjtT7zdp6oR
+    build: ./payment-service
+    container_name: payment-service
+    env_file:
+      - ./payment-service/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - cloudforge-network
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    env_file:
+      - ./notification-service/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - cloudforge-network
+
+  api-gateway:
+    image: nginx
+    container_name: api-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - user-service
+      - product-service
+      - order-service
+    networks:
+      - cloudforge-network
+
+networks:
+  cloudforge-network:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
