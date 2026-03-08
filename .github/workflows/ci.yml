@@ -121,26 +121,26 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy user-service
-        run: railway up --service user-service
+        run: railway up --service user-service --project ${{ secrets.RAILWAY_PROJECT_ID }} --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Deploy product-service
-        run: railway up --service product-service
+        run: railway up --service product-service --project ${{ secrets.RAILWAY_PROJECT_ID }} --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Deploy order-service
-        run: railway up --service order-service
+        run: railway up --service order-service --project ${{ secrets.RAILWAY_PROJECT_ID }} --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Deploy payment-service
-        run: railway up --service payment-service
+        run: railway up --service payment-service --project ${{ secrets.RAILWAY_PROJECT_ID }} --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
       - name: Deploy notification-service
-        run: railway up --service notification-service
+        run: railway up --service notification-service --project ${{ secrets.RAILWAY_PROJECT_ID }} --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
