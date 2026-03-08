@@ -6,10 +6,12 @@ import { connectRabbitMQ } from "./rabbitmq.js";
 import cookieParser from "cookie-parser";
 import logger from "./config/logger.js";
 import client from "prom-client";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+app.use(cors({ origin: "*" }));
 
 // Prometheus metrics setup
 const collectDefaultMetrics = client.collectDefaultMetrics;
