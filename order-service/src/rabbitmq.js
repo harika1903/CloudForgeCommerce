@@ -1,37 +1,31 @@
 import amqp from "amqplib";
+import logger from "./config/logger.js";
 
 let channel;
-
-/* -------------------- Connect RabbitMQ -------------------- */
 
 export const connectRabbitMQ = async () => {
   while (true) {
     try {
       const connection = await amqp.connect(process.env.RABBITMQ_URL);
-
       channel = await connection.createChannel();
 
       await channel.assertExchange("order_created_exchange", "fanout", {
         durable: false
       });
 
-      console.log("RabbitMQ connected");
-
+      logger.info("RabbitMQ connected ✅");
       break;
     } catch (error) {
-      console.log("RabbitMQ not ready, retrying in 5 seconds...", error.message);
+      logger.error(`RabbitMQ not ready, retrying in 5 seconds... ${error.message}`);
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
 };
 
-/* -------------------- Publish Event -------------------- */
-
 export const publishEvent = (event) => {
   if (!channel) {
     throw new Error("RabbitMQ channel not initialized");
   }
-
   channel.publish(
     "order_created_exchange",
     "",

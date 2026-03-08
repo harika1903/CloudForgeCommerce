@@ -1,19 +1,29 @@
 import amqp from "amqplib";
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import winston from "winston";
 
 dotenv.config();
 
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.colorize(),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `[${timestamp}] ${level}: ${message}`;
+    })
+  ),
+  transports: [new winston.transports.Console()],
+});
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-/* -------------------- Process Payment via Stripe -------------------- */
-
 const processStripePayment = async (order) => {
-  // Convert to smallest currency unit (paise for INR)
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Math.round(order.totalAmount * 100),
     currency: "inr",
-    payment_method: "pm_card_visa", // Stripe's built-in test payment method
+    payment_method: "pm_card_visa",
     confirm: true,
     automatic_payment_methods: {
       enabled: true,
@@ -31,14 +41,9 @@ const processStripePayment = async (order) => {
     userId: order.userId,
     amount: order.totalAmount,
     currency: "INR",
-    status:
-      paymentIntent.status === "succeeded"
-        ? "payment_success"
-        : "payment_failed",
+    status: paymentIntent.status === "succeeded" ? "payment_success" : "payment_failed",
   };
 };
-
-/* -------------------- Connect RabbitMQ -------------------- */
 
 const connectRabbitMQ = async () => {
   while (true) {
@@ -53,59 +58,43 @@ const connectRabbitMQ = async () => {
       const q = await channel.assertQueue(queue, { durable: false });
       await channel.bindQueue(q.queue, exchange, "");
 
-      console.log("💳 Payment Service connected");
-      console.log("Waiting for orders...");
+      logger.info("💳 Payment Service connected ✅");
+      logger.info("Waiting for orders...");
 
       channel.consume(q.queue, async (msg) => {
         const order = JSON.parse(msg.content.toString());
-
-        console.log("📦 Order received:", order);
-        console.log(`💰 Processing Stripe payment for order ${order.orderId}`);
+        logger.info(`📦 Order received: ${JSON.stringify(order)}`);
+        logger.info(`💰 Processing Stripe payment for order ${order.orderId}`);
 
         try {
           const paymentResult = await processStripePayment(order);
-          console.log(`✅ Payment result:`, paymentResult);
+          logger.info(`✅ Payment result: ${JSON.stringify(paymentResult)}`);
 
-          // Publish payment result to RabbitMQ
           const paymentExchange = "payment_created_exchange";
-          await channel.assertExchange(paymentExchange, "fanout", {
-            durable: false,
-          });
-          channel.publish(
-            paymentExchange,
-            "",
-            Buffer.from(JSON.stringify(paymentResult))
-          );
-
-          console.log(`📤 Payment event published for order ${order.orderId}`);
+          await channel.assertExchange(paymentExchange, "fanout", { durable: false });
+          channel.publish(paymentExchange, "", Buffer.from(JSON.stringify(paymentResult)));
+          logger.info(`📤 Payment event published for order ${order.orderId}`);
         } catch (err) {
-          console.error(`❌ Stripe payment failed:`, err.message);
-
-          // Publish failure event too
+          logger.error(`❌ Stripe payment failed: ${err.message}`);
           const paymentExchange = "payment_created_exchange";
-          await channel.assertExchange(paymentExchange, "fanout", {
-            durable: false,
-          });
+          await channel.assertExchange(paymentExchange, "fanout", { durable: false });
           channel.publish(
             paymentExchange,
             "",
-            Buffer.from(
-              JSON.stringify({
-                orderId: order.orderId,
-                userId: order.userId,
-                status: "payment_failed",
-                error: err.message,
-              })
-            )
+            Buffer.from(JSON.stringify({
+              orderId: order.orderId,
+              userId: order.userId,
+              status: "payment_failed",
+              error: err.message,
+            }))
           );
         }
-
         channel.ack(msg);
       });
 
       break;
     } catch (err) {
-      console.log("RabbitMQ not ready, retrying in 5 seconds...", err.message);
+      logger.error(`RabbitMQ not ready, retrying in 5 seconds... ${err.message}`);
       await new Promise((res) => setTimeout(res, 5000));
     }
   }
