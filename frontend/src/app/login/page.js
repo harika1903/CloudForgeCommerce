@@ -11,9 +11,9 @@ export default function LoginPage() {
     if (token) router.push("/products");
   }, []);
 
-  const handleGoogleLogin = () => {
-    window.location.href = "https://user-service-production-94f9.up.railway.app/auth/google";
-  };
+const handleGoogleLogin = () => {
+  window.location.href = "https://user-service-production-94f9.up.railway.app/api/users/auth/google";
+};
 
   return (
     <div className={styles.container}>
