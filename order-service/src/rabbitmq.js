@@ -19,7 +19,7 @@ export const connectRabbitMQ = async () => {
 
       break;
     } catch (error) {
-      console.log("RabbitMQ not ready, retrying in 5 seconds...");
+      console.log("RabbitMQ not ready, retrying in 5 seconds...", error.message);
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
