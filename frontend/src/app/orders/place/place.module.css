@@ -141,3 +141,21 @@
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .summary {
+    position: static;
+  }
+}

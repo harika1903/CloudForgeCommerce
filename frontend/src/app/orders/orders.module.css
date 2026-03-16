@@ -39,6 +39,8 @@
   align-items: center;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .orderId {
@@ -65,6 +67,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .orderInfo {
@@ -72,6 +76,7 @@
   gap: 2rem;
   color: #555;
   font-size: 0.95rem;
+  flex-wrap: wrap;
 }
 
 .orderTotal {
@@ -110,4 +115,23 @@
 
 .shopBtn:hover {
   background-color: #c73652;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .orderHeader {
+    padding: 1rem;
+  }
+
+  .orderBody {
+    padding: 1rem;
+  }
+
+  .orderInfo {
+    gap: 1rem;
+    font-size: 0.85rem;
+  }
 }

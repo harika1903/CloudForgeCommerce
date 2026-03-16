@@ -183,3 +183,26 @@
 .checkoutBtn:hover {
   background-color: #c73652;
 }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .cartLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .item {
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+
+  .itemTotal {
+    min-width: auto;
+  }
+
+  .summary {
+    position: static;
+  }
+}

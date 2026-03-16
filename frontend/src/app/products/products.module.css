@@ -9,6 +9,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .header h1 {
@@ -136,4 +138,45 @@
 .empty p {
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+
+  .cardImage {
+    height: 140px;
+  }
+
+  .cardBody {
+    padding: 0.75rem;
+  }
+
+  .cardBody h3 {
+    font-size: 0.95rem;
+  }
+
+  .price {
+    font-size: 1rem;
+  }
+
+  .addBtn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
 }
